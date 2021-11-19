@@ -8,6 +8,10 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
+import com.amazonaws.services.ec2.model.RebootInstancesRequest;
+import com.amazonaws.services.ec2.model.RebootInstancesResult;
 
 public class awsTest {
     /*
@@ -51,16 +55,31 @@ public class awsTest {
             System.out.println(" 3. start instance\t 4. available regions ");
             System.out.println(" 5. stop instance\t 6. create instance ");
             System.out.println(" 7. reboot instance\t 8. list images ");
-            System.out.println(" \t 99. quit");
+            System.out.println(" \t\t\t\t\t 99. quit");
             System.out.println("------------------------------------------------------------");
 
             System.out.print("Enter an integer: ");
-            number=id_string.nextInt();
+            number=menu.nextInt();
 
 
             switch (number) {
                 case 1:
                     listInstances();
+                    break;
+                case 3:
+                    System.out.print("Enter instance id:");
+                    String start_id=id_string.next();
+                    startInstances(start_id);
+                    break;
+                case 5:
+                    System.out.print("Enter instance id:");
+                    String stop_id=id_string.next();
+                    stopInstances(stop_id);
+                    break;
+                case 7:
+                    System.out.print("Enter instance id:");
+                    String reboot_id=id_string.next();
+                    rebootInstances(reboot_id);
                     break;
                 case 99:
                     System.exit(0);
@@ -90,5 +109,28 @@ public class awsTest {
                 done = true;
             }
         }
+    }
+    public static void startInstances(String instance_id) {
+        System.out.printf("Starting ....%s\n",instance_id);
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        StartInstancesRequest request = new StartInstancesRequest().withInstanceIds(instance_id);
+        ec2.startInstances(request);
+        System.out.printf("Successfully started instance %s\n",instance_id);
+
+    }
+    public static void stopInstances(String instance_id) {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(instance_id);
+        ec2.stopInstances(request);
+        System.out.printf("Successfully stop instance %s\n",instance_id);
+
+    }
+    public static void rebootInstances(String instance_id) {
+        System.out.printf("Rebooting ....%s\n",instance_id);
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        RebootInstancesRequest request = new RebootInstancesRequest().withInstanceIds(instance_id);
+        RebootInstancesResult response = ec2.rebootInstances(request);
+        System.out.printf("Successfully rebooted instance %s\n",instance_id);
+
     }
 }
