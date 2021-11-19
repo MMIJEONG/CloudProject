@@ -12,6 +12,10 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.RebootInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+import com.amazonaws.services.ec2.model.Region;
+import com.amazonaws.services.ec2.model.AvailabilityZone;
+import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 
 public class awsTest {
     /*
@@ -66,10 +70,16 @@ public class awsTest {
                 case 1:
                     listInstances();
                     break;
+                case 2:
+                    listAvailablezone();
+                    break;
                 case 3:
                     System.out.print("Enter instance id:");
                     String start_id=id_string.next();
                     startInstances(start_id);
+                    break;
+                case 4:
+                    listAvailableregion();
                     break;
                 case 5:
                     System.out.print("Enter instance id:");
@@ -81,6 +91,9 @@ public class awsTest {
                     String reboot_id=id_string.next();
                     rebootInstances(reboot_id);
                     break;
+//                case 8:
+//                    listImages();
+//                    break;
                 case 99:
                     System.exit(0);
             }
@@ -132,5 +145,26 @@ public class awsTest {
         RebootInstancesResult response = ec2.rebootInstances(request);
         System.out.printf("Successfully rebooted instance %s\n",instance_id);
 
+    }
+    public static void listAvailablezone() {
+        System.out.println("Available zones....");
+        DescribeAvailabilityZonesResult zones_response = ec2.describeAvailabilityZones();
+        int count=0;
+        for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
+            System.out.printf("[id] %s, " +
+                    "[region] %s, " +
+                    "[zone] %s ", zone.getZoneId(), zone.getRegionName(), zone.getZoneName());
+            System.out.println();
+            count+=1;
+        }
+        System.out.printf("You have access to %d Availability Zones.\n",count);
+    }
+    public static void listAvailableregion() {
+        System.out.println("Available regions ....");
+        DescribeRegionsResult regions_response = ec2.describeRegions();
+        for(Region region : regions_response.getRegions()) {
+            System.out.printf("[region] %s, " + "[endpoint] %s ", region.getRegionName(), region.getEndpoint());
+            System.out.println();
+        }
     }
 }
