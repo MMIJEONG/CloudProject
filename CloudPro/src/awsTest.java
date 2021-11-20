@@ -1,3 +1,5 @@
+import java.awt.*;
+import java.util.List;
 import java.util.Scanner;
 
 import com.amazonaws.AmazonClientException;
@@ -5,6 +7,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.ec2.model.Image;
 
 
 public class awsTest {
@@ -49,7 +52,7 @@ public class awsTest {
             System.out.println(" 3. start instance\t 4. available regions ");
             System.out.println(" 5. stop instance\t 6. create instance ");
             System.out.println(" 7. reboot instance\t 8. list images ");
-            System.out.println(" \t\t\t\t\t 99. quit");
+            System.out.println(" 9. terminate instance\t 99. quit");
             System.out.println("------------------------------------------------------------");
 
             System.out.print("Enter an integer: ");
@@ -89,6 +92,11 @@ public class awsTest {
                 case 8:
                     listImages();
                     break;
+                case 9:
+                    System.out.print("Enter instance id:");
+                    String terminate_id=id_string.next();
+                    terminateInstances(terminate_id);
+                    break;
                 case 99:
                     System.exit(0);
             }
@@ -109,8 +117,9 @@ public class awsTest {
                             "[type] %s, " +
                             "[state] %10s, " +
                             "[monitoring state] %s", instance.getInstanceId(), instance.getImageId(), instance.getInstanceType(), instance.getState().getName(), instance.getMonitoring().getState());
+                    System.out.println();
                 }
-                System.out.println();
+
             }
             request.setNextToken(response.getNextToken());
             if (response.getNextToken() == null) {
@@ -120,14 +129,12 @@ public class awsTest {
     }
     public static void startInstances(String instance_id) {
         System.out.printf("Starting ....%s\n",instance_id);
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
         StartInstancesRequest request = new StartInstancesRequest().withInstanceIds(instance_id);
         ec2.startInstances(request);
         System.out.printf("Successfully started instance %s\n",instance_id);
 
     }
     public static void stopInstances(String instance_id) {
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
         StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(instance_id);
         ec2.stopInstances(request);
         System.out.printf("Successfully stop instance %s\n",instance_id);
@@ -135,9 +142,8 @@ public class awsTest {
     }
     public static void rebootInstances(String instance_id) {
         System.out.printf("Rebooting ....%s\n",instance_id);
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
         RebootInstancesRequest request = new RebootInstancesRequest().withInstanceIds(instance_id);
-        RebootInstancesResult response = ec2.rebootInstances(request);
+        ec2.rebootInstances(request);
         System.out.printf("Successfully rebooted instance %s\n",instance_id);
 
     }
@@ -146,9 +152,7 @@ public class awsTest {
         DescribeAvailabilityZonesResult zones_response = ec2.describeAvailabilityZones();
         int count=0;
         for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
-            System.out.printf("[id] %s, " +
-                    "[region] %s, " +
-                    "[zone] %s ", zone.getZoneId(), zone.getRegionName(), zone.getZoneName());
+            System.out.printf("[id] %s, " + "[region] %s, " + "[zone] %s ", zone.getZoneId(), zone.getRegionName(), zone.getZoneName());
             System.out.println();
             count+=1;
         }
@@ -184,6 +188,19 @@ public class awsTest {
         String new_instance_id = response.getReservation().getInstances().get(0).getInstanceId();
         System.out.printf("Successfully started EC2 instance %s based on AMI %s",new_instance_id,ami_id);
 
+    }
+    public static void terminateInstances(String instance_id) {
+        Scanner pick = new Scanner(System.in);
+        System.out.print("Are you really terminate instance?(1:yes,2:no): ");
+        int ans = pick.nextInt();
+        if(ans==1){
+            TerminateInstancesRequest request = new TerminateInstancesRequest().withInstanceIds(instance_id);
+            ec2.terminateInstances(request);
+            System.out.printf("Successfully terminated instance %s\n",instance_id);
+        }
+        else{
+            return;
+        }
     }
 
 }
