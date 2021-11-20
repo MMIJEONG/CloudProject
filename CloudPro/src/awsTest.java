@@ -76,6 +76,11 @@ public class awsTest {
                     String stop_id=id_string.next();
                     stopInstances(stop_id);
                     break;
+                case 6:
+                    System.out.print("Enter ami id:");
+                    String ami_id=id_string.next();
+                    createInstances(ami_id);
+                    break;
                 case 7:
                     System.out.print("Enter instance id:");
                     String reboot_id=id_string.next();
@@ -159,12 +164,25 @@ public class awsTest {
     }
     public static void listImages() {
         System.out.println("Listing images....");
-        DescribeImagesRequest request = new DescribeImagesRequest();
+        DescribeImagesRequest request = new DescribeImagesRequest().withOwners("AWS계정ID");
         DescribeImagesResult response = ec2.describeImages(request);
         for (Image image : response.getImages()) {
             System.out.printf("[ImageID] %s, " + "[Name] %s, " + "[Owner] %s ", image.getImageId(), image.getName(), image.getOwnerId());
             System.out.println();
         }
+
+    }
+    public static void createInstances(String ami_id) {
+        RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+        runInstancesRequest.withImageId(ami_id)
+                           .withInstanceType(InstanceType.T2Micro)
+                           .withMinCount(1)
+                           .withMaxCount(1)
+                           .withKeyName("my-key-pair")
+                           .withSecurityGroups("my-security-group");
+        RunInstancesResult response = ec2.runInstances(runInstancesRequest);
+        String new_instance_id = response.getReservation().getInstances().get(0).getInstanceId();
+        System.out.printf("Successfully started EC2 instance %s based on AMI %s",new_instance_id,ami_id);
 
     }
 
